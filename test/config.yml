@@ -2,7 +2,10 @@ auth:
     login: 6dd490faf9cb87a9862245da41170ff2
     tranKey: 024h1IlD
     additional:
-        name1: value1
-        name2: value2
-        name3: value3
+        #name1: value1
+        #name2: value2
+        #name3: value3
     endpoint: https://test.placetopay.com/soap/pse/
+
+cache:
+    path:     #Default sys_get_temp_dir()

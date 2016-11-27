@@ -11,28 +11,15 @@ namespace Pckg\Payment\Handler;
 
 use Pckg\Payment\Adapter\pseAdapter;
 use Pckg\Payment\Services\PSE;
+use Pckg\Payment\Validate\Validator;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Validation;
 
 class Dispatcher
 {
-
-    /*private StudentView studentView;
-    private HomeView homeView;
-
-    public Dispatcher(){
-    studentView = new StudentView();
-    homeView = new HomeView();
-    }
-
-    public void dispatch(String request){
-        if(request.equalsIgnoreCase("STUDENT")){
-            studentView.show();
-        }
-        else{
-            homeView.show();
-        }
-    }*/
-
     private $pseAdapter;
+    private $errors;
 
     /**
      * Dispatcher constructor.
@@ -42,14 +29,30 @@ class Dispatcher
         if (strcasecmp($handler, "pse") == 0)
         {
             $this->pseAdapter = new pseAdapter(new PSE());
+            $this->errors["status"] = "error";
         }
     }
 
-    public function dispatch($request)
+    public function dispatch($request, $params)
     {
         if (strcasecmp($request, "getbanklist") == 0)
         {
-            $this->pseAdapter->getBankList();
+            return $this->pseAdapter->getBankList();
+        }
+
+        if (strcasecmp($request, "create-transaction") == 0)
+        {
+            if (!$params)
+                return null;
+
+            $response_valid = Validator::initValid($params);
+            var_dump($response_valid);
+
+            if ($response_valid["status"] == "error")
+                return $response_valid;
+
+            return $this->pseAdapter->createTransaction($params);
         }
     }
+
 }

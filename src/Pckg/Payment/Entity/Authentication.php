@@ -88,6 +88,13 @@ class Authentication
         $this->additional = $additional;
     }
 
-
+    public function toArray() {
+        return [
+                'login'		=> $this->login,
+                'tranKey'	=> $this->tranKey,
+                'seed'		=> $this->seed,
+                'additional'=> $this->additional
+        ];
+    }
 
 }

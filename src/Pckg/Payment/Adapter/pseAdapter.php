@@ -36,12 +36,13 @@ class pseAdapter implements paymentAdapter
     public function getBankList()
     {
         // TODO: Implement getBankList() method.
-        $this->pse->getBankList();
+        return $this->pse->getBankList();
     }
 
     public function createTransaction($params)
     {
         // TODO: Implement createTransaction() method.
+        return $this->pse->createTransaction($params);
     }
 
     public function getTransactionInfo($params)

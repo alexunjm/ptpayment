@@ -23,13 +23,13 @@ class PTPayment
 
     public function __construct($path_config, $handler)
     {
-        $this->dispatcher = new Dispatcher($handler);
         $this->path_config = $path_config;
         $this->initConfig();
+        $this->dispatcher = new Dispatcher($handler);
     }
 
-    public function dispatchRequest($request){
-        $this->dispatcher->dispatch($request);
+    public function dispatchRequest($request, $params=null){
+        return $this->dispatcher->dispatch($request, $params);
     }
 
     private function initConfig()
@@ -42,8 +42,6 @@ class PTPayment
     {
         try {
             $this->config = Yaml::parse(file_get_contents($this->path_config));
-            var_dump($this->config);
-
         } catch (ParseException $e) {
             printf("Unable to parse the YAML string: %s", $e->getMessage());
         }

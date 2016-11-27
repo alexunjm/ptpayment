@@ -17,5 +17,48 @@ $path_config = "./config.yml";
 $pse = new PTPayment($path_config, "pse");
 $bankList = $pse->dispatchRequest("getbanklist");
 
+$bank = array_filter($bankList, function ($bankObj){
+            return strtolower($bankObj->bankName) == strtolower("Banco Union Colombiano") ? true : false;
+        });
 
+$key = key($bank);
+$bank = $bank[$key];
 
+$person = array(
+        "document" => "ssa",
+        "documentType" => "CC",
+        "firstName" => "Juana",
+        "lastName" => "López",
+        "company" => "ARC",
+        "emailAddress" => "juana@arc.com",
+        "address" => "Carrera 51",
+        "city" => "Medellín",
+        "province" => "Antioquia",
+        "country" => "CO",        
+        "phone" => "4445380",
+        "mobile" => "3173369032",
+    );
+
+$params = array(
+        "bankCode" => $bank->bankCode,
+        "bankInterface" => 1,
+        "returnURL" => "http://www.google.com",
+        "reference" => uniqid("pay_"),
+        "description" => "Descripción del Pago",
+        "language" => "ES",
+        "currency" => "COP",
+        "totalAmount" => 100,
+        "taxAmount" => 1,
+        "devolutionBase" => 1,
+        "tipAmount" => 10,
+        "payer" => $person,
+        "buyer" => $person,
+        "shipping" => $person,
+        "ipAddress" => "127.0.0.1",
+        "userAgent" => "chrome",
+        "additionalData" => array(),
+    );
+
+$response = $pse->dispatchRequest("create-transaction", $params);
+
+var_dump($response);

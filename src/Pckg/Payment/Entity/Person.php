@@ -8,6 +8,13 @@ namespace Pckg\Payment\Entity;
 class Person
 {
     /**
+     * document
+     *
+     * @var string[12] Número de identificación de la persona
+     **/
+    private $document;
+    
+    /**
      * documentType
      *
      * @var string [3] Tipo de documento de identificación de la persona [CC, CE, TI, PPN].
@@ -71,13 +78,6 @@ class Person
     private $country;
 
     /**
-     * dirección
-     *
-     * @var string física acorde a ISO 3166-1, mayúscula sostenida.
-     */
-    private $direccion;
-
-    /**
      * phone
      *
      * @var string[30] Número de telefonía fija
@@ -92,7 +92,9 @@ class Person
     private $mobile;
     
     function __construct(
+        $document,
         $documentType,
+        $firstName,
         $lastName,
         $company,
         $emailAddress,
@@ -100,11 +102,12 @@ class Person
         $city,
         $province,
         $country,
-        $direccion,
         $phone,
         $mobile)
     {
+        $this->document = $document;
         $this->documentType = $documentType;
+        $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->company = $company;
         $this->emailAddress = $emailAddress;
@@ -112,14 +115,23 @@ class Person
         $this->city = $city;
         $this->province = $province;
         $this->country = $country;
-        $this->direccion = $direccion;
         $this->phone = $phone;
         $this->mobile = $mobile;
+    }
+
+    public function getDocument()
+    {
+        return $this->document;
     }
 
     public function getDocumentType()
     {
         return $this->documentType;
+    }
+
+    public function getFirstName()
+    {
+        return $this->firstName;
     }
 
     public function getLastName()
@@ -175,6 +187,11 @@ class Person
     public function setDocumentType($documentType)
     {
         $this->documentType = $documentType;
+    }
+
+    public function setFirstName($firstName)
+    {
+        $this->firstName = $firstName;
     }
 
     public function setLastName($lastName)
