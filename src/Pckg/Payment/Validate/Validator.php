@@ -26,12 +26,14 @@ class Validator
     {
         self::$validator = Validation::createValidator();
         self::$params = $params;
-
         foreach ($params as $key => $value) {
             if ($key == "payer" || $key == "buyer" || $key == "shipping" || $key == "additionalData") {
-                foreach (self::$params[$key] as $index => $field)
-                {
-                    self::validNotBlank($index, $field);
+                if (self::$params[$key]) {
+                    foreach (self::$params[$key] as $index => $field) {
+                        self::validNotBlank($index, $field);
+                    }
+                } else {
+                    self::$params[$key] = array();
                 }
             } else {
                 self::validNotBlank($key, $value);
@@ -40,11 +42,12 @@ class Validator
 
         if (count(self::$errors) > 0)
             return array(
-                    "status"  =>  "error",
+                    "status" => "error",
             );
 
         return array(
-            "status"  =>  "success",
+                "status" => "success",
+                "params" => self::$params,
         );
     }
 

@@ -20,6 +20,7 @@ class Config
 
     public static $auth;
     public static $endpoint;
+    public static $returnURL;
 
     public static function setParams($params)
     {
@@ -44,6 +45,13 @@ class Config
         CacheManager::setDefaultConfig(array(
                 "path" => $path,
         ));
+
+        $returnURL = $params["returnURL"];
+        if ($returnURL["path"]) {
+            self::$returnURL = $returnURL["path"];
+        } else {
+            self::$returnURL = "https://www.google.com.co/";
+        }
 
     }
 }

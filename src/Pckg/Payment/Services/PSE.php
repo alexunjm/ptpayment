@@ -12,6 +12,7 @@ namespace Pckg\Payment\Services;
 use DateInterval;
 use DateTime;
 use Pckg\Payment\Entity\Authentication;
+use Pckg\Payment\Entity\PSETransactionRequest;
 use Pckg\Payment\Handler\Config;
 use phpFastCache\CacheManager;
 use phpFastCache\Core\phpFastCache;
@@ -21,7 +22,7 @@ use SoapFault;
 class PSE
 {
     private $authenticate;
-    private static $client;
+    private $client;
     private $InstanceCache;
 
     public function __construct()
@@ -29,17 +30,11 @@ class PSE
         ini_set('soap.wsdl_cache_enabled', 0);
         ini_set('soap.wsdl_cache_ttl', 900);
         ini_set('default_socket_timeout', 15);
-        self::$client = new SoapClient( Config::$endpoint, array(
+        $this->client = new SoapClient( Config::$endpoint, array(
                 'trace'		=> true,
-                'exceptions'=> false
+                'exceptions'=> true
         ));
         $this->InstanceCache = CacheManager::getInstance('files');
-    }
-
-    public function sendPayment($amount)
-    {
-        // Paying via Paypal //
-        echo "Paying via PayPal: " . $amount;
     }
 
     private function authenticate()
@@ -50,6 +45,9 @@ class PSE
         $hashString = sha1($seed . $tranKey, false);
         $this->authenticate->setSeed($seed);
         $this->authenticate->setTranKey($hashString);
+        if (!$this->authenticate->getAdditional()){
+            $this->authenticate->setAdditional(array());
+        }
     }
 
     public function getBankList()
@@ -74,7 +72,7 @@ class PSE
 
     private function call_bank($CachedString)
     {
-        $result = self::$client->getBankList([ 'auth' => $this->authenticate->toArray() ]);
+        $result = $this->client->getBankList([ 'auth' => $this->authenticate->toArray() ]);
         if (is_soap_fault($result)) {
             trigger_error("SOAP Fault: (faultcode: {$result->faultcode}, faultstring: {$result->faultstring})", E_USER_ERROR);
         }
@@ -93,13 +91,36 @@ class PSE
     public function createTransaction($params)
     {
         $this->authenticate();
-        $result = self::$client->createTransaction([
-                'auth'          => $this->authenticate->toArray(),
-                'transaction'   => $params
-        ]);
-        if (is_soap_fault($result)) {
-            trigger_error("SOAP Fault: (faultcode: {$result->faultcode}, faultstring: {$result->faultstring})", E_USER_ERROR);
+        $pseTransRequest = new PSETransactionRequest(
+                $params["bankCode"],
+                $params["bankInterface"],
+                $params["reference"],
+                $params["description"],
+                $params["language"],
+                $params["currency"],
+                $params["totalAmount"],
+                $params["taxAmount"],
+                $params["devolutionBase"],
+                $params["tipAmount"],
+                $params["payer"],
+                $params["buyer"],
+                $params["shipping"],
+                $params["additionalData"]
+            );
+        
+        try {
+            $result = $this->client->createTransaction([
+                    'auth'          => $this->authenticate->toArray(),
+                    'transaction'   => $pseTransRequest->toArray()
+            ]);
+        } catch (SoapFault $fault) {
+            trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
         }
+
+        $data = serialize($result);
+
+
+        return unserialize($data);
 
     }
 

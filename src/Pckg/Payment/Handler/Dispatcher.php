@@ -46,12 +46,11 @@ class Dispatcher
                 return null;
 
             $response_valid = Validator::initValid($params);
-            var_dump($response_valid);
-
+            
             if ($response_valid["status"] == "error")
                 return $response_valid;
 
-            return $this->pseAdapter->createTransaction($params);
+            return $this->pseAdapter->createTransaction($response_valid["params"]);
         }
     }
 
