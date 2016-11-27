@@ -12,8 +12,7 @@ namespace Pckg\Payment\Adapter;
 interface paymentAdapter
 {
     public function pay($amount);
-    public function authenticate($params);
     public function createTransaction($params);
-    public function getBankList($params);
+    public function getBankList();
     public function getTransactionInfo($params);
 }

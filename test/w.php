@@ -7,12 +7,15 @@
  */
 namespace Pckg\Test;
 
+use Pckg\Payment\PTPayment;
+
 require '../vendor/autoload.php';
 require '../src/autoload.php';
 
-use Pckg\Payment\Adapter\pseAdapter;
-use Pckg\Payment\Services\PSE;
+$path_config = "./config.yml";
 
-$pse = new pseAdapter(new PSE());
-$pse->pay('2629');
+$pse = new PTPayment($path_config, "pse");
+$bankList = $pse->dispatchRequest("getbanklist");
+
+
 

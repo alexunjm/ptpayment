@@ -9,6 +9,8 @@
 namespace Pckg\Payment\Adapter;
 
 
+use Pckg\Payment\Services\PSE;
+
 class pseAdapter implements paymentAdapter
 {
     private $pse;
@@ -31,16 +33,10 @@ class pseAdapter implements paymentAdapter
         $this->pse->sendPayment($amount);
     }
 
-    public function authenticate($params)
-    {
-        // TODO: Implement authenticate() method.
-
-        $this->pse->authenticate($params);
-    }
-
-    public function getBankList($params)
+    public function getBankList()
     {
         // TODO: Implement getBankList() method.
+        $this->pse->getBankList();
     }
 
     public function createTransaction($params)

@@ -9,6 +9,9 @@
 namespace Pckg\Payment\Handler;
 
 
+use Pckg\Payment\Adapter\pseAdapter;
+use Pckg\Payment\Services\PSE;
+
 class Dispatcher
 {
 
@@ -29,15 +32,24 @@ class Dispatcher
         }
     }*/
 
+    private $pseAdapter;
+
     /**
      * Dispatcher constructor.
      */
-    public function __construct()
+    public function __construct($handler)
     {
+        if (strcasecmp($handler, "pse") == 0)
+        {
+            $this->pseAdapter = new pseAdapter(new PSE());
+        }
     }
 
     public function dispatch($request)
     {
-        
+        if (strcasecmp($request, "getbanklist") == 0)
+        {
+            $this->pseAdapter->getBankList();
+        }
     }
 }

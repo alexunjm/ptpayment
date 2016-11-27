@@ -9,24 +9,22 @@
 namespace Pckg\Payment;
 
 
+use Pckg\Payment\Handler\Config;
 use Pckg\Payment\Handler\Dispatcher;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 class PTPayment
 {
 
     private $dispatcher;
+    private $path_config;
     private $config;
-    private $handler;
 
-    /**
-     * PTPayment constructor.
-     * @param $dispatcher
-     */
-    public function __construct($config, $handler)
+    public function __construct($path_config, $handler)
     {
-        $this->handler = $handler;
-        $this->dispatcher = new Dispatcher();
-        $this->config = $config;
+        $this->dispatcher = new Dispatcher($handler);
+        $this->path_config = $path_config;
         $this->initConfig();
     }
 
@@ -34,8 +32,20 @@ class PTPayment
         $this->dispatcher->dispatch($request);
     }
 
-    public function initConfig()
+    private function initConfig()
     {
-        
+        $this->parseYAML();
+        Config::setParams($this->config);
+    }
+
+    private function parseYAML()
+    {
+        try {
+            $this->config = Yaml::parse(file_get_contents($this->path_config));
+            var_dump($this->config);
+
+        } catch (ParseException $e) {
+            printf("Unable to parse the YAML string: %s", $e->getMessage());
+        }
     }
 }
