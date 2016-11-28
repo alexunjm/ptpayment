@@ -95,7 +95,6 @@ class PSE
         $pseTransRequest = new PSETransactionRequest(
                 $params["bankCode"],
                 $params["bankInterface"],
-                $params["reference"],
                 $params["description"],
                 $params["language"],
                 $params["currency"],

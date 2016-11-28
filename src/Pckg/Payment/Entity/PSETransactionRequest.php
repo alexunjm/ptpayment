@@ -135,7 +135,6 @@ class PSETransactionRequest
     function __construct(
 			$bankCode,
 			$bankInterface,
-			$reference,
 			$description,
 			$language,
 			$currency,
@@ -151,7 +150,7 @@ class PSETransactionRequest
         $this->bankCode = $bankCode;
         $this->bankInterface = $bankInterface;
         $this->returnURL = Config::$returnURL;
-        $this->reference = $reference;
+        $this->reference = uniqid("pay_");
         $this->description = $description;
         $this->language = $language;
         $this->currency = $currency;
