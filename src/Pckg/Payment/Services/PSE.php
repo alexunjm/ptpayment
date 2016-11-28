@@ -19,6 +19,7 @@ use phpFastCache\CacheManager;
 use phpFastCache\Core\phpFastCache;
 use SoapClient;
 use SoapFault;
+use SQLite3;
 
 class PSE
 {
@@ -91,7 +92,6 @@ class PSE
 
     public function createTransaction($params)
     {
-        $this->authenticate();
         $pseTransRequest = new PSETransactionRequest(
                 $params["bankCode"],
                 $params["bankInterface"],
@@ -108,15 +108,43 @@ class PSE
                 $params["shipping"],
                 $params["additionalData"]
             );
-        
+
+        $trankey = $this->authenticate->getTranKey();
+        $seed = $this->authenticate->getSeed();
+        $additional = $this->authenticate->getAdditional();
+
+        $params = ["auth" => array(
+                "login" => $this->authenticate->getLogin(),
+                "tranKey" => $trankey,
+                "seed" => $seed,
+                "additional" => $additional,
+        ),
+                "transaction" => array(
+                        'bankCode'		=> $pseTransRequest->getBankCode(),
+                        'bankInterface'	=> $pseTransRequest->getBankInterface(),
+                        'returnURL'		=> $pseTransRequest->getReturnURL(),
+                        'reference'		=> $pseTransRequest->getReference(),
+                        'description'	=> $pseTransRequest->getDescription(),
+                        'language'		=> $pseTransRequest->getLanguage(),
+                        'currency'		=> $pseTransRequest->getCurrency(),
+                        'totalAmount'	=> $pseTransRequest->getTotalAmount(),
+                        'taxAmount'		=> $pseTransRequest->getTaxAmount(),
+                        'devolutionBase'=> $pseTransRequest->getDevolutionBase(),
+                        'tipAmount'		=> $pseTransRequest->getTipAmount(),
+                        'payer'			=> $pseTransRequest->getPayer(),
+                        'ipAddress'		=> $pseTransRequest->getIpAddress(),
+                        'userAgent'		=> $pseTransRequest->getUserAgent(),
+                        'additionalData'=> $pseTransRequest->getAdditionalData()
+                )
+        ];
+
+
         try {
-            $result = $this->client->createTransaction([
-                    'auth'          => $this->authenticate->toArray(),
-                    'transaction'   => $pseTransRequest->toArray()
-            ]);
+            $result = $this->client->createTransaction($params);
         } catch (SoapFault $fault) {
             trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
         }
+
         $data = serialize($result);
 
         $data = unserialize($data);
@@ -124,51 +152,71 @@ class PSE
         if ($response->returnCode == "SUCCESS")
             $this->persist($response);
 
-        return $data;
+        return $data->createTransactionResult;
 
     }
 
     private function persist($response)
     {
-        $sql =<<<EOF
-                INSERT INTO transaction  
-                    VALUES ($response->returnCode,
-                        $response->bankURL,
-                        $response->trazabilityCode,
-                        $response->transactionID,
-                        $response->sessionID,
-                        $response->bankCurrency,
-                        $response->bankFactor,
-                        $response->responseCode,
-                        $response->responseReasonText);
-EOF;
-        $db = new DB();
-        if(!$db){
-            echo $db->lastErrorMsg();
+        $sql ="
+                BEGIN TRANSACTION;
+                    INSERT INTO `transaction` 
+                        (returnCode,
+                        bankURL,
+                        trazabilityCode,
+                        transactionID,
+                        sessionID,
+                        bankCurrency,
+                        bankFactor,
+                        responseCode,
+                        responseReasonText) 
+                        VALUES ('$response->returnCode',
+                            '$response->bankURL',
+                            '$response->trazabilityCode',
+                            '$response->transactionID',
+                            '$response->sessionID',
+                            '$response->bankCurrency',
+                            $response->bankFactor,
+                            $response->responseCode,
+                            '$response->responseReasonText.');
+                COMMIT;
+        ";
+        $dbhandle = new DB();
+        if(!$dbhandle){
+            echo $dbhandle->lastErrorMsg();
+            echo "pas";
         } else {
-            $ret = $db->exec($sql);
+            $ret = $dbhandle->exec($sql);
             if(!$ret){
-                echo $db->lastErrorMsg();
+                echo $dbhandle->lastErrorMsg();
             } else {
                 echo "Records created successfully\n";
-                header("Location:" . $response->bankURL);
             }
-            $db->close();
+            $dbhandle->close();
         }
     }
 
     public function getTransactionInformation($params)
     {
-        var_dump($params);
-        $this->authenticate();
+        $trankey = $this->authenticate->getTranKey();
+        $seed = $this->authenticate->getSeed();
+        $additional = $this->authenticate->getAdditional();
+        $params = ["auth" => array(
+                                "login" => $this->authenticate->getLogin(),
+                                "tranKey" => $trankey,
+                                "seed" => $seed,
+                                "additional" => $additional,
+                            ),
+                "transactionID" => 1443452912];
+
+
         try {
-            $result = $this->client->createTransaction([
-                    'auth'          => $this->authenticate->toArray(),
-                    'transaction'   => $params
-            ]);
+            $result = $this->client->getTransactionInformation($params);
         } catch (SoapFault $fault) {
             trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
         }
         $data = serialize($result);
+
+        return unserialize($data)->getTransactionInformationResult;
     }
 }

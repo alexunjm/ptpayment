@@ -14,4 +14,4 @@ returnURL:
     path: https://www.google.com.co/
 
 database:
-    path: database.db
+    path: data.sqlite3

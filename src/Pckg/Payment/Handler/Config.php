@@ -58,8 +58,9 @@ class Config
         if ($database["path"]){
             self::$database = $database["path"];
         } else {
-            self::$database = tempnam(sys_get_temp_dir(), 'database.db');
+            self::$database = sys_get_temp_dir() . '\database.db';
         }
+        
 
 
     }

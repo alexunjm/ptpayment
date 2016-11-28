@@ -25,7 +25,7 @@ $key = key($bank);
 $bank = $bank[$key];
 
 $person = array(
-        "document" => "ssa",
+        "document" => "5044928468",
         "documentType" => "CC",
         "firstName" => "Juana",
         "lastName" => "López",
@@ -44,7 +44,7 @@ $params = array(
         "bankInterface" => 1,
         "returnURL" => "http://www.google.com",
         "reference" => uniqid("pay_"),
-        "description" => "Descripción del Pago",
+        "description" => "Pago",
         "language" => "ES",
         "currency" => "COP",
         "totalAmount" => 100,
@@ -61,4 +61,8 @@ $params = array(
 
 $response = $pse->dispatchRequest("create-transaction", $params);
 
-$info = $pse->dispatchRequest("transactionInfo", $transactionID=1443452912);
+if($response->returnCode == "SUCCESS")
+{
+    var_dump($pse->dispatchRequest("transactionInfo", $transactionID=$response->transactionID));
+}
+

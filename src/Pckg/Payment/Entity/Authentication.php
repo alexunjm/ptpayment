@@ -89,12 +89,12 @@ class Authentication
     }
 
     public function toArray() {
-        return [
+        return array(
                 'login'		=> $this->login,
                 'tranKey'	=> $this->tranKey,
                 'seed'		=> $this->seed,
                 'additional'=> $this->additional
-        ];
+        );
     }
 
 }
