@@ -21,7 +21,10 @@ $ composer require edcas/ptpayment
 
 ## Testing
 
+``` bash
 Archivo test/config.yml
+```
+
     auth:
         login: 6dd490faf9cb87a9862245da41170ff2
         tranKey: 024h1IlD
@@ -40,7 +43,10 @@ Archivo test/config.yml
     database:
         path: data.sqlite3
 
-Archivo principa demo: test/w.php
+#Demo de implementación:
+``` bash
+File: test/w.php
+```
 
 
 ## License
