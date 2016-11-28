@@ -12,6 +12,7 @@ namespace Pckg\Payment\Services;
 use DateInterval;
 use DateTime;
 use Pckg\Payment\Entity\Authentication;
+use Pckg\Payment\Entity\DB;
 use Pckg\Payment\Entity\PSETransactionRequest;
 use Pckg\Payment\Handler\Config;
 use phpFastCache\CacheManager;
@@ -116,16 +117,58 @@ class PSE
         } catch (SoapFault $fault) {
             trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
         }
-
         $data = serialize($result);
 
+        $data = unserialize($data);
+        $response = $data->createTransactionResult;
+        if ($response->returnCode == "SUCCESS")
+            $this->persist($response);
 
-        return unserialize($data);
+        return $data;
 
     }
 
-    public function getTransactionInformation()
+    private function persist($response)
     {
+        $sql =<<<EOF
+                INSERT INTO transaction  
+                    VALUES ($response->returnCode,
+                        $response->bankURL,
+                        $response->trazabilityCode,
+                        $response->transactionID,
+                        $response->sessionID,
+                        $response->bankCurrency,
+                        $response->bankFactor,
+                        $response->responseCode,
+                        $response->responseReasonText);
+EOF;
+        $db = new DB();
+        if(!$db){
+            echo $db->lastErrorMsg();
+        } else {
+            $ret = $db->exec($sql);
+            if(!$ret){
+                echo $db->lastErrorMsg();
+            } else {
+                echo "Records created successfully\n";
+                header("Location:" . $response->bankURL);
+            }
+            $db->close();
+        }
+    }
 
+    public function getTransactionInformation($params)
+    {
+        var_dump($params);
+        $this->authenticate();
+        try {
+            $result = $this->client->createTransaction([
+                    'auth'          => $this->authenticate->toArray(),
+                    'transaction'   => $params
+            ]);
+        } catch (SoapFault $fault) {
+            trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
+        }
+        $data = serialize($result);
     }
 }

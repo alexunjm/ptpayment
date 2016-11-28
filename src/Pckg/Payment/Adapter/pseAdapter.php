@@ -48,5 +48,6 @@ class pseAdapter implements paymentAdapter
     public function getTransactionInfo($params)
     {
         // TODO: Implement getTransactionInfo() method.
+        return $this->pse->getTransactionInformation($params);
     }
 }

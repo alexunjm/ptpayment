@@ -61,4 +61,4 @@ $params = array(
 
 $response = $pse->dispatchRequest("create-transaction", $params);
 
-var_dump($response);
+$info = $pse->dispatchRequest("transactionInfo", $transactionID=1443452912);

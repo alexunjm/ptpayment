@@ -26,8 +26,7 @@ class Dispatcher
      */
     public function __construct($handler)
     {
-        if (strcasecmp($handler, "pse") == 0)
-        {
+        if (strcasecmp($handler, "pse") == 0) {
             $this->pseAdapter = new pseAdapter(new PSE());
             $this->errors["status"] = "error";
         }
@@ -35,22 +34,27 @@ class Dispatcher
 
     public function dispatch($request, $params)
     {
-        if (strcasecmp($request, "getbanklist") == 0)
-        {
+        if (strcasecmp($request, "getbanklist") == 0) {
             return $this->pseAdapter->getBankList();
         }
 
-        if (strcasecmp($request, "create-transaction") == 0)
-        {
+        if (strcasecmp($request, "create-transaction") == 0) {
             if (!$params)
                 return null;
 
             $response_valid = Validator::initValid($params);
-            
+
             if ($response_valid["status"] == "error")
                 return $response_valid;
 
             return $this->pseAdapter->createTransaction($response_valid["params"]);
+        }
+
+        if (strcasecmp($request, "transactionInfo") == 0) {
+            if (!$params)
+                return null;
+
+            return $this->pseAdapter->getTransactionInfo($params);
         }
     }
 

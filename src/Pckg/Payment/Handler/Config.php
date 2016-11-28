@@ -21,6 +21,7 @@ class Config
     public static $auth;
     public static $endpoint;
     public static $returnURL;
+    public static $database;
 
     public static function setParams($params)
     {
@@ -52,6 +53,14 @@ class Config
         } else {
             self::$returnURL = "https://www.google.com.co/";
         }
+
+        $database = $params["database"];
+        if ($database["path"]){
+            self::$database = $database["path"];
+        } else {
+            self::$database = tempnam(sys_get_temp_dir(), 'database.db');
+        }
+
 
     }
 }
